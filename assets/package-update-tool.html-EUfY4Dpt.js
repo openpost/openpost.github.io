@@ -1,0 +1,72 @@
+import{_ as s}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as n,c as a,h as e}from"./app-DhMJQ1_3.js";const p={},l=e(`<h1 id="node-js-package-version-update-tool-ncu" tabindex="-1"><a class="header-anchor" href="#node-js-package-version-update-tool-ncu"><span>Node.js package version update tool NCU</span></a></h1><blockquote><p>npm-check-updates - <a href="https://www.npmjs.com/package/npm-check-updates" target="_blank" rel="noopener noreferrer">https://www.npmjs.com/package/npm-check-updates</a></p></blockquote><h2 id="_1-배경" tabindex="-1"><a class="header-anchor" href="#_1-배경"><span>1. 배경</span></a></h2><p><code>npm install</code>을 사용하여 패키지 설치를 하는 경우 <code>package.json</code>에는 보통 패치버전을 허용하는 형태로 저장된다.</p><div class="language-json" data-highlighter="prismjs" data-ext="json" data-title="package.json"><pre class="language-json"><code><span class="line"><span class="token punctuation">{</span></span>
+<span class="line">    <span class="token property">&quot;...&quot;</span> <span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span></span>
+<span class="line">    <span class="token property">&quot;devDependencies&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="line">        <span class="token property">&quot;@vue/repl&quot;</span><span class="token operator">:</span> <span class="token string">&quot;^3.4.0&quot;</span><span class="token punctuation">,</span></span>
+<span class="line">        <span class="token property">&quot;...&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span></code></pre></div><p><code>^3.4.0</code>의 경우 <code>3.4</code> 버전 기준 패치버전인 <code>3.4.x</code>로만 업데이트 되기 때문에 매이저 또는 마이너가 변경되는 경우 개별적으로 업데이트 해줘야하는 불편함이 있었다.</p><div class="hint-container tip"><p class="hint-container-title">팁</p><p>업데이트가 필요한 패키지는 <code>npm outdated</code>로 확인할 수 있다.</p></div><h2 id="_2-npm-check-updates" tabindex="-1"><a class="header-anchor" href="#_2-npm-check-updates"><span>2. npm-check-updates</span></a></h2><p>검색을 해보니 많은 사람들이 <code>npm-check-updates</code> 패키지로 최신 버전으로 업데이트하는 것을 확인할 수 있었다. 이 툴은 전역으로 설치하여 사용한다.</p><div class="language-bash" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line"><span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-g</span> npm-check-updates</span>
+<span class="line"></span></code></pre></div><p>이후 <code>ncu</code>라는 명령어로 업데이트 될 패키지와 변경될 버전을 확인할 수 있다.</p><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line">$ ncu</span>
+<span class="line"></span>
+<span class="line">Checking /Users/gs/workspaces/docs/docmoa/package.json</span>
+<span class="line"><span class="token punctuation">[</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token punctuation">]</span> <span class="token number">19</span>/19 <span class="token number">100</span>%</span>
+<span class="line"></span>
+<span class="line"> @vue/repl                         ^3.4.0  →        ^4.2.1</span>
+<span class="line"> chart.js                          ^4.4.1  →        ^4.4.3</span>
+<span class="line"> echarts                           ^5.4.3  →        ^5.5.0</span>
+<span class="line"> katex                            ^0.16.9  →      ^0.16.10</span>
+<span class="line"> mermaid                          ^10.8.0  →       ^10.9.1</span>
+<span class="line"> vue                              ^3.4.19  →       ^3.4.30</span>
+<span class="line"> vuepress-plugin-search-pro  ^2.0.0-rc.31  →  ^2.0.0-rc.50</span>
+<span class="line"></span>
+<span class="line">Run ncu <span class="token parameter variable">-u</span> to upgrade package.json</span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>명령의 결과로 표기되는것 처럼 <code>package.json</code>의 내용을 자동으로 수정하려면 <code>ncu -u</code>로 옵션을 추가하여 실행시켜야 한다.</p><div class="hint-container caution"><p class="hint-container-title">위험</p><p>자동업데이트는 편하지만 영향도를 알 수 없는 경우 최신버전이 무엇인지 확인하는 용도로만도 사용할 수 있다.</p></div><p>이후, <code>ncu -u</code>를 수행하면 <code>package.json</code> 내용을 자동으로 업데이트 해준다. 업데이트된 <code>package.json</code>을 기준으로 <code>npm install</code>을 수행하여 패키지 업그레이드 작업을 완료한다.</p><div class="language-text line-numbers-mode" data-highlighter="prismjs" data-ext="text" data-title="text"><pre class="language-text"><code><span class="line">$ ncu -u</span>
+<span class="line"></span>
+<span class="line">Upgrading /Users/gs/workspaces/docs/docmoa/package.json</span>
+<span class="line">[====================] 19/19 100%</span>
+<span class="line"></span>
+<span class="line"> @vue/repl                         ^3.4.0  →        ^4.2.1</span>
+<span class="line"> chart.js                          ^4.4.1  →        ^4.4.3</span>
+<span class="line"> echarts                           ^5.4.3  →        ^5.5.0</span>
+<span class="line"> katex                            ^0.16.9  →      ^0.16.10</span>
+<span class="line"> mermaid                          ^10.8.0  →       ^10.9.1</span>
+<span class="line"> vue                              ^3.4.19  →       ^3.4.30</span>
+<span class="line"> vuepress-plugin-search-pro  ^2.0.0-rc.31  →  ^2.0.0-rc.50</span>
+<span class="line"></span>
+<span class="line">Run npm install to install new versions.</span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="_3-선택적-업데이트" tabindex="-1"><a class="header-anchor" href="#_3-선택적-업데이트"><span>3. 선택적 업데이트</span></a></h2><p>일괄 버전 업데이트가 아니라 선택적으로 하려는 경우 <code>ncu -i --format group</code> 명령을 사용할 수 있다.</p><ul><li>위아래 키보드를 눌러 패키지를 선택한다.</li><li>스페이스바로 선택/미선택 을 조절할 수 있다.</li><li><code>a</code>를 누르면 모든 것에 대해 선택/미선택을 조절할 수 있다.</li><li>원하는 패키지를 선택 후 <code>엔터</code>키로 선택을 저장한다.</li></ul><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line">$ ncu <span class="token parameter variable">-i</span> <span class="token parameter variable">--format</span> group</span>
+<span class="line">Upgrading /Users/gs/workspaces/docs/docmoa/package.json</span>
+<span class="line"><span class="token punctuation">[</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token punctuation">]</span> <span class="token number">19</span>/19 <span class="token number">100</span>%</span>
+<span class="line"></span>
+<span class="line">? Choose <span class="token function">which</span> packages to update › </span>
+<span class="line">  ↑/↓: Select a package</span>
+<span class="line">  Space: Toggle selection</span>
+<span class="line">  a: Toggle all</span>
+<span class="line">  Enter: Upgrade </span>
+<span class="line"></span>
+<span class="line">Patch   Backwards-compatible bug fixes</span>
+<span class="line">❯ ◉ chart.js                          ^4.4.1  →        ^4.4.3</span>
+<span class="line">  ◉ vue                              ^3.4.19  →       ^3.4.30</span>
+<span class="line">  ◉ vuepress-plugin-search-pro  ^2.0.0-rc.31  →  ^2.0.0-rc.50</span>
+<span class="line">  ◉ vuepress-theme-hope         ^2.0.0-rc.30  →  ^2.0.0-rc.50</span>
+<span class="line"></span>
+<span class="line">Minor   Backwards-compatible features</span>
+<span class="line">  ◉ echarts                           ^5.4.3  →        ^5.5.0</span>
+<span class="line">  ◉ mermaid                          ^10.8.0  →       ^10.9.1</span>
+<span class="line"></span>
+<span class="line">Major   Potentially breaking API changes</span>
+<span class="line">  ◯ @vue/repl                         ^3.4.0  →        ^4.2.1</span>
+<span class="line"></span>
+<span class="line">Major version zero   Anything may change</span>
+<span class="line">  ◯ katex                            ^0.16.9  →      ^0.16.10</span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p><code>엔터</code>키를 누르면 <code>npm install</code> 여부를 물어본다.</p><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line">✔ Choose <span class="token function">which</span> packages to update › </span>
+<span class="line"></span>
+<span class="line"> chart.js                          ^4.4.1  →        ^4.4.3</span>
+<span class="line"> echarts                           ^5.4.3  →        ^5.5.0</span>
+<span class="line"> mermaid                          ^10.8.0  →       ^10.9.1</span>
+<span class="line"> vue                              ^3.4.19  →       ^3.4.30</span>
+<span class="line"> vuepress-plugin-search-pro  ^2.0.0-rc.31  →  ^2.0.0-rc.50</span>
+<span class="line"> vuepress-theme-hope         ^2.0.0-rc.30  →  ^2.0.0-rc.50</span>
+<span class="line"></span>
+<span class="line">? Run <span class="token function">npm</span> <span class="token function">install</span> to <span class="token function">install</span> new versions? › <span class="token punctuation">(</span>Y/n<span class="token punctuation">)</span></span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div>`,22),i=[l];function c(t,o){return n(),a("div",null,i)}const u=s(p,[["render",c],["__file","package-update-tool.html.vue"]]),v=JSON.parse('{"path":"/05-Software/NodeJS/package-update-tool.html","title":"Node.js package version update tool NCU","lang":"ko-KR","frontmatter":{"description":"Node.js의 필요 패키지의 최신 버전으로 package.json을 업데이트하는 툴","tag":["nodejs"],"head":[["meta",{"property":"og:url","content":"https://docmoa.github.io/05-Software/NodeJS/package-update-tool.html"}],["meta",{"property":"og:site_name","content":"docmoa"}],["meta",{"property":"og:title","content":"Node.js package version update tool NCU"}],["meta",{"property":"og:description","content":"Node.js의 필요 패키지의 최신 버전으로 package.json을 업데이트하는 툴"}],["meta",{"property":"og:type","content":"article"}],["meta",{"property":"og:locale","content":"ko-KR"}],["meta",{"property":"og:updated_time","content":"2024-06-27T02:09:20.000Z"}],["meta",{"property":"article:tag","content":"nodejs"}],["meta",{"property":"article:modified_time","content":"2024-06-27T02:09:20.000Z"}],["script",{"type":"application/ld+json"},"{\\"@context\\":\\"https://schema.org\\",\\"@type\\":\\"Article\\",\\"headline\\":\\"Node.js package version update tool NCU\\",\\"image\\":[\\"\\"],\\"dateModified\\":\\"2024-06-27T02:09:20.000Z\\",\\"author\\":[]}"]]},"headers":[{"level":2,"title":"1. 배경","slug":"_1-배경","link":"#_1-배경","children":[]},{"level":2,"title":"2. npm-check-updates","slug":"_2-npm-check-updates","link":"#_2-npm-check-updates","children":[]},{"level":2,"title":"3. 선택적 업데이트","slug":"_3-선택적-업데이트","link":"#_3-선택적-업데이트","children":[]}],"git":{"createdTime":1719454160000,"updatedTime":1719454160000,"contributors":[{"name":"Great-Stone","email":"hahohh@gmail.com","commits":1}]},"readingTime":{"minutes":4.77,"words":286},"filePathRelative":"05-Software/NodeJS/package-update-tool.md","localizedDate":"2024년 6월 27일","excerpt":"\\n<blockquote>\\n<p>npm-check-updates - <a href=\\"https://www.npmjs.com/package/npm-check-updates\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">https://www.npmjs.com/package/npm-check-updates</a></p>\\n</blockquote>\\n<h2>1. 배경</h2>\\n<p><code>npm install</code>을 사용하여 패키지 설치를 하는 경우 <code>package.json</code>에는 보통 패치버전을 허용하는 형태로 저장된다.</p>"}');export{u as comp,v as data};

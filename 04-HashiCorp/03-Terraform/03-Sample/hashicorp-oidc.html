@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="ko-KR" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content="VuePress 2.0.0-rc.14" />
+    <meta name="theme" content="VuePress Theme Hope 2.0.0-rc.50" />
+    <style>
+      html {
+        background: var(--bg-color, #fff);
+      }
+
+      html[data-theme="dark"] {
+        background: var(--bg-color, #1d1e1f);
+      }
+
+      body {
+        background: var(--bg-color);
+      }
+    </style>
+    <script>
+      const userMode = localStorage.getItem("vuepress-theme-hope-scheme");
+      const systemDarkMode =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      if (userMode === "dark" || (userMode !== "light" && systemDarkMode)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    </script>
+    <meta name="Nomad, Vault를 keycloak oidc로 관리하기 with terraform" content="다양한 Soulution을 keycloak을 통해 oidc를 적용하고 관리"><meta property="og:url" content="https://docmoa.github.io/04-HashiCorp/03-Terraform/03-Sample/hashicorp-oidc.html"><meta property="og:site_name" content="docmoa"><meta property="og:title" content="Nomad, Vault를 keycloak oidc로 관리하기 with terraform"><meta property="og:description" content="Nomad, Vault를 keycloak oidc로 관리하기 with terraform 요즘같이 사내에 많은 Open Source, Enterprise Soulition이 사용되는 시기에 각 Solution별로 ID/Password를 관리하는 것은 쉽지 않습니다. 거기다 만약 Dev, Stage, Production..."><meta property="og:type" content="article"><meta property="og:locale" content="ko-KR"><meta property="og:updated_time" content="2024-09-24T06:48:52.000Z"><meta property="article:author" content="unghee"><meta property="article:tag" content="vault"><meta property="article:tag" content="nomad"><meta property="article:tag" content="keycloak"><meta property="article:tag" content="oidc"><meta property="article:tag" content="terraform"><meta property="article:modified_time" content="2024-09-24T06:48:52.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Nomad, Vault를 keycloak oidc로 관리하기 with terraform","image":[""],"dateModified":"2024-09-24T06:48:52.000Z","author":[{"@type":"Person","name":"unghee"}]}</script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"><link rel="icon" href="/logo.png"><link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials"><meta name="theme-color" content="#46bd87"><link rel="apple-touch-icon" href="/assets/icon/apple-icon-152.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="msapplication-TileImage" content="/assets/icon/ms-icon-144.png"><meta name="msapplication-TileColor" content="#ffffff"><link rel="alternate" type="application/rss+xml" href="https://docmoa.github.io/rss.xml" title="docmoa RSS Feed"><title>Nomad, Vault를 keycloak oidc로 관리하기 with terraform | docmoa</title><meta name="description" content="Nomad, Vault를 keycloak oidc로 관리하기 with terraform 요즘같이 사내에 많은 Open Source, Enterprise Soulition이 사용되는 시기에 각 Solution별로 ID/Password를 관리하는 것은 쉽지 않습니다. 거기다 만약 Dev, Stage, Production...">
+    <link rel="preload" href="/assets/style-CkODk6eP.css" as="style"><link rel="stylesheet" href="/assets/style-CkODk6eP.css">
+    <link rel="modulepreload" href="/assets/app-DhMJQ1_3.js"><link rel="modulepreload" href="/assets/hashicorp-oidc.html-mhAnwdSG.js"><link rel="modulepreload" href="/assets/plugin-vue_export-helper-DlAUqK2U.js">
+    
+  </head>
+  <body>
+    <div id="app"><!--[--><!--[--><!--[--><span tabindex="-1"></span><a href="#main-content" class="vp-skip-link sr-only">본문으로 건너뛰기</a><!--]--><!--[--><div class="theme-container external-link-icon has-toc"><!--[--><header id="navbar" class="vp-navbar"><div class="vp-navbar-start"><button type="button" class="vp-toggle-sidebar-button" title="Toggle Sidebar"><span class="icon"></span></button><!----><!--[--><a class="route-link vp-brand" href="/"><img class="vp-nav-logo" src="/logo.png" alt><!----><span class="vp-site-name hide-in-pad">docmoa</span></a><!--]--><!----></div><div class="vp-navbar-center"><!----><!--[--><nav class="vp-nav-links"><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/" aria-label="docmoa"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-home" style=""></span><!--]-->docmoa<!----></a></div><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/00-Howto/" aria-label="How To"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-rocket" style=""></span><!--]-->How To<!----></a></div><div class="vp-nav-item hide-in-mobile"><div class="vp-dropdown-wrapper"><button type="button" class="vp-dropdown-title" aria-label="Infra"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-server" style=""></span>Infra<!--]--><span class="arrow"></span><ul class="vp-dropdown"><li class="vp-dropdown-item"><a class="route-link auto-link" href="/01-Infrastructure/" aria-label="Infrastructure"><!---->Infrastructure<!----></a></li><li class="vp-dropdown-item"><a class="route-link auto-link" href="/02-PrivatePlatform/" aria-label="Private-Platform"><!---->Private-Platform<!----></a></li><li class="vp-dropdown-item"><a class="route-link auto-link" href="/03-PublicCloud/" aria-label="Public-Cloud"><!---->Public-Cloud<!----></a></li></ul></button></div></div><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/05-Software/" aria-label="Software"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-code" style=""></span><!--]-->Software<!----></a></div><div class="vp-nav-item hide-in-mobile"><a class="route-link route-link-active auto-link" href="/04-HashiCorp/" aria-label="HashiCorp"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-layer-group" style=""></span><!--]-->HashiCorp<!----></a></div><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/07-Kubernetes/" aria-label="Kubernetes"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-dharmachakra" style=""></span><!--]-->Kubernetes<!----></a></div><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/06-etc/" aria-label="Etc."><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-mug-hot" style=""></span><!--]-->Etc.<!----></a></div><div class="vp-nav-item hide-in-mobile"><div class="vp-dropdown-wrapper"><button type="button" class="vp-dropdown-title" aria-label="MORE"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-circle-info" style=""></span>MORE<!--]--><span class="arrow"></span><ul class="vp-dropdown"><li class="vp-dropdown-item"><a class="route-link auto-link" href="/99-about/01-About.html" aria-label="About"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-house-circle-exclamation" style=""></span><!--]-->About<!----></a></li><li class="vp-dropdown-item"><a class="route-link auto-link" href="/99-about/02-Thanks.html" aria-label="Thank you"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-heart" style=""></span><!--]-->Thank you<!----></a></li></ul></button></div></div><div class="vp-nav-item hide-in-mobile"><a class="route-link auto-link" href="/timeline/" aria-label="Recently"><!--[--><span class="font-icon icon fa-fw fa-sm fas fa-clock-rotate-left" style=""></span><!--]-->Recently<!----></a></div></nav><!--]--><!----></div><div class="vp-navbar-end"><!----><!--[--><!----><div class="vp-nav-item vp-action"><a class="vp-action-link" href="https://github.com/docmoa/docs" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" class="icon github-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="github icon" name="github" style="width:1.25rem;height:1.25rem;vertical-align:middle;"><path d="M511.957 21.333C241.024 21.333 21.333 240.981 21.333 512c0 216.832 140.544 400.725 335.574 465.664 24.49 4.395 32.256-10.07 32.256-23.083 0-11.69.256-44.245 0-85.205-136.448 29.61-164.736-64.64-164.736-64.64-22.315-56.704-54.4-71.765-54.4-71.765-44.587-30.464 3.285-29.824 3.285-29.824 49.195 3.413 75.179 50.517 75.179 50.517 43.776 75.008 114.816 53.333 142.762 40.79 4.523-31.66 17.152-53.377 31.19-65.537-108.971-12.458-223.488-54.485-223.488-242.602 0-53.547 19.114-97.323 50.517-131.67-5.035-12.33-21.93-62.293 4.779-129.834 0 0 41.258-13.184 134.912 50.346a469.803 469.803 0 0 1 122.88-16.554c41.642.213 83.626 5.632 122.88 16.554 93.653-63.488 134.784-50.346 134.784-50.346 26.752 67.541 9.898 117.504 4.864 129.834 31.402 34.347 50.474 78.123 50.474 131.67 0 188.586-114.73 230.016-224.042 242.09 17.578 15.232 33.578 44.672 33.578 90.454v135.85c0 13.142 7.936 27.606 32.854 22.87C862.25 912.597 1002.667 728.747 1002.667 512c0-271.019-219.648-490.667-490.71-490.667z"></path></svg></a></div><div class="vp-nav-item hide-in-mobile"><button type="button" class="vp-outlook-button" tabindex="-1" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="icon outlook-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="outlook icon" name="outlook"><path d="M224 800c0 9.6 3.2 44.8 6.4 54.4 6.4 48-48 76.8-48 76.8s80 41.6 147.2 0 134.4-134.4 38.4-195.2c-22.4-12.8-41.6-19.2-57.6-19.2C259.2 716.8 227.2 761.6 224 800zM560 675.2l-32 51.2c-51.2 51.2-83.2 32-83.2 32 25.6 67.2 0 112-12.8 128 25.6 6.4 51.2 9.6 80 9.6 54.4 0 102.4-9.6 150.4-32l0 0c3.2 0 3.2-3.2 3.2-3.2 22.4-16 12.8-35.2 6.4-44.8-9.6-12.8-12.8-25.6-12.8-41.6 0-54.4 60.8-99.2 137.6-99.2 6.4 0 12.8 0 22.4 0 12.8 0 38.4 9.6 48-25.6 0-3.2 0-3.2 3.2-6.4 0-3.2 3.2-6.4 3.2-6.4 6.4-16 6.4-16 6.4-19.2 9.6-35.2 16-73.6 16-115.2 0-105.6-41.6-198.4-108.8-268.8C704 396.8 560 675.2 560 675.2zM224 419.2c0-28.8 22.4-51.2 51.2-51.2 28.8 0 51.2 22.4 51.2 51.2 0 28.8-22.4 51.2-51.2 51.2C246.4 470.4 224 448 224 419.2zM320 284.8c0-22.4 19.2-41.6 41.6-41.6 22.4 0 41.6 19.2 41.6 41.6 0 22.4-19.2 41.6-41.6 41.6C339.2 326.4 320 307.2 320 284.8zM457.6 208c0-12.8 12.8-25.6 25.6-25.6 12.8 0 25.6 12.8 25.6 25.6 0 12.8-12.8 25.6-25.6 25.6C470.4 233.6 457.6 220.8 457.6 208zM128 505.6C128 592 153.6 672 201.6 736c28.8-60.8 112-60.8 124.8-60.8-16-51.2 16-99.2 16-99.2l316.8-422.4c-48-19.2-99.2-32-150.4-32C297.6 118.4 128 291.2 128 505.6zM764.8 86.4c-22.4 19.2-390.4 518.4-390.4 518.4-22.4 28.8-12.8 76.8 22.4 99.2l9.6 6.4c35.2 22.4 80 12.8 99.2-25.6 0 0 6.4-12.8 9.6-19.2 54.4-105.6 275.2-524.8 288-553.6 6.4-19.2-3.2-32-19.2-32C777.6 76.8 771.2 80 764.8 86.4z"></path></svg><div class="vp-outlook-dropdown"><!----></div></button></div><!--[--><button type="button" class="search-pro-button" aria-label="검색"><svg xmlns="http://www.w3.org/2000/svg" class="icon search-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="search icon" name="search"><path d="M192 480a256 256 0 1 1 512 0 256 256 0 0 1-512 0m631.776 362.496-143.2-143.168A318.464 318.464 0 0 0 768 480c0-176.736-143.264-320-320-320S128 303.264 128 480s143.264 320 320 320a318.016 318.016 0 0 0 184.16-58.592l146.336 146.368c12.512 12.48 32.768 12.48 45.28 0 12.48-12.512 12.48-32.768 0-45.28"></path></svg><div class="search-pro-placeholder">검색</div><div class="search-pro-key-hints"><kbd class="search-pro-key">Ctrl</kbd><kbd class="search-pro-key">K</kbd></div></button><!--]--><!--]--><!----><button type="button" class="vp-toggle-navbar-button" aria-label="Toggle Navbar" aria-expanded="false" aria-controls="nav-screen"><span><span class="vp-top"></span><span class="vp-middle"></span><span class="vp-bottom"></span></span></button></div></header><!----><!--]--><!----><div class="toggle-sidebar-wrapper"><span class="arrow start"></span></div><aside id="sidebar" class="vp-sidebar"><!----><ul class="vp-sidebar-links"><li><a class="route-link auto-link vp-sidebar-link" href="/04-HashiCorp/" aria-label="HashiCorp"><!---->HashiCorp<!----></a></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">01 Packer</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">02 Vagrant</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable active" type="button"><!----><span class="vp-sidebar-title">03 Terraform</span><span class="vp-arrow down"></span></button><ul class="vp-sidebar-links"><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">01 Information</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">02 Config</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable active" type="button"><!----><span class="vp-sidebar-title">03 Sample</span><span class="vp-arrow down"></span></button><ul class="vp-sidebar-links"><li><a class="route-link auto-link vp-sidebar-link" href="/04-HashiCorp/03-Terraform/03-Sample/hashicat-azure.html" aria-label="Intro to Terraform on Azure"><!---->Intro to Terraform on Azure<!----></a></li><li><a class="route-link auto-link vp-sidebar-link" href="/04-HashiCorp/03-Terraform/03-Sample/nomad-csi-sample.html" aria-label="Nomad CSI Sample"><!---->Nomad CSI Sample<!----></a></li><li><a class="route-link route-link-active auto-link vp-sidebar-link active" href="/04-HashiCorp/03-Terraform/03-Sample/hashicorp-oidc.html" aria-label="Nomad, Vault를 keycloak oidc로 관리하기 with terraform"><!---->Nomad, Vault를 keycloak oidc로 관리하기 with terraform<!----></a></li></ul></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">04 Trouble Shooting</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">05 Airgap</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">06 Terraform Enterprise</span><span class="vp-arrow end"></span></button><!----></section></li></ul></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">04 Consul</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">05 Boundary</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">06 Vault</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">07 Nomad</span><span class="vp-arrow end"></span></button><!----></section></li><li><section class="vp-sidebar-group"><button class="vp-sidebar-header clickable" type="button"><!----><span class="vp-sidebar-title">08 Updates</span><span class="vp-arrow end"></span></button><!----></section></li></ul><!----></aside><!--[--><main id="main-content" class="vp-page"><!--[--><!----><!----><nav class="vp-breadcrumb disable"></nav><div class="vp-page-title"><h1><!---->Nomad, Vault를 keycloak oidc로 관리하기 with terraform</h1><div class="page-info"><span class="page-author-info" aria-label="작성자🖊" data-balloon-pos="up"><svg xmlns="http://www.w3.org/2000/svg" class="icon author-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="author icon" name="author"><path d="M649.6 633.6c86.4-48 147.2-144 147.2-249.6 0-160-128-288-288-288s-288 128-288 288c0 108.8 57.6 201.6 147.2 249.6-121.6 48-214.4 153.6-240 288-3.2 9.6 0 19.2 6.4 25.6 3.2 9.6 12.8 12.8 22.4 12.8h704c9.6 0 19.2-3.2 25.6-12.8 6.4-6.4 9.6-16 6.4-25.6-25.6-134.4-121.6-240-243.2-288z"></path></svg><span><span class="page-author-item">unghee</span></span><span property="author" content="unghee"></span></span><!----><span class="page-date-info" aria-label="작성일📅" data-balloon-pos="up"><svg xmlns="http://www.w3.org/2000/svg" class="icon calendar-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="calendar icon" name="calendar"><path d="M716.4 110.137c0-18.753-14.72-33.473-33.472-33.473-18.753 0-33.473 14.72-33.473 33.473v33.473h66.993v-33.473zm-334.87 0c0-18.753-14.72-33.473-33.473-33.473s-33.52 14.72-33.52 33.473v33.473h66.993v-33.473zm468.81 33.52H716.4v100.465c0 18.753-14.72 33.473-33.472 33.473a33.145 33.145 0 01-33.473-33.473V143.657H381.53v100.465c0 18.753-14.72 33.473-33.473 33.473a33.145 33.145 0 01-33.473-33.473V143.657H180.6A134.314 134.314 0 0046.66 277.595v535.756A134.314 134.314 0 00180.6 947.289h669.74a134.36 134.36 0 00133.94-133.938V277.595a134.314 134.314 0 00-133.94-133.938zm33.473 267.877H147.126a33.145 33.145 0 01-33.473-33.473c0-18.752 14.72-33.473 33.473-33.473h736.687c18.752 0 33.472 14.72 33.472 33.473a33.145 33.145 0 01-33.472 33.473z"></path></svg><span><!----></span><meta property="datePublished" content="2024-09-24T03:11:56.000Z"></span><!----><span class="page-reading-time-info" aria-label="읽는 시간⌛" data-balloon-pos="up"><svg xmlns="http://www.w3.org/2000/svg" class="icon timer-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="timer icon" name="timer"><path d="M799.387 122.15c4.402-2.978 7.38-7.897 7.38-13.463v-1.165c0-8.933-7.38-16.312-16.312-16.312H256.33c-8.933 0-16.311 7.38-16.311 16.312v1.165c0 5.825 2.977 10.874 7.637 13.592 4.143 194.44 97.22 354.963 220.201 392.763-122.204 37.542-214.893 196.511-220.2 389.397-4.661 5.049-7.638 11.651-7.638 19.03v5.825h566.49v-5.825c0-7.379-2.849-13.981-7.509-18.9-5.049-193.016-97.867-351.985-220.2-389.527 123.24-37.67 216.446-198.453 220.588-392.892zM531.16 450.445v352.632c117.674 1.553 211.787 40.778 211.787 88.676H304.097c0-48.286 95.149-87.382 213.728-88.676V450.445c-93.077-3.107-167.901-81.297-167.901-177.093 0-8.803 6.99-15.793 15.793-15.793 8.803 0 15.794 6.99 15.794 15.793 0 80.261 63.69 145.635 142.01 145.635s142.011-65.374 142.011-145.635c0-8.803 6.99-15.793 15.794-15.793s15.793 6.99 15.793 15.793c0 95.019-73.789 172.82-165.96 177.093z"></path></svg><span>약 19 분</span><meta property="timeRequired" content="PT19M"></span><!----><span class="page-tag-info" aria-label="태그🏷" data-balloon-pos="up"><svg xmlns="http://www.w3.org/2000/svg" class="icon tag-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="tag icon" name="tag"><path d="M939.902 458.563L910.17 144.567c-1.507-16.272-14.465-29.13-30.737-30.737L565.438 84.098h-.402c-3.215 0-5.726 1.005-7.634 2.913l-470.39 470.39a10.004 10.004 0 000 14.164l365.423 365.424c1.909 1.908 4.42 2.913 7.132 2.913s5.223-1.005 7.132-2.913l470.39-470.39c2.01-2.11 3.014-5.023 2.813-8.036zm-240.067-72.121c-35.458 0-64.286-28.828-64.286-64.286s28.828-64.285 64.286-64.285 64.286 28.828 64.286 64.285-28.829 64.286-64.286 64.286z"></path></svg><!--[--><span class="page-tag-item color2 clickable" role="navigation">vault</span><span class="page-tag-item color6 clickable" role="navigation">nomad</span><span class="page-tag-item color1 clickable" role="navigation">keycloak</span><span class="page-tag-item color6 clickable" role="navigation">oidc</span><span class="page-tag-item color1 clickable" role="navigation">terraform</span><!--]--><meta property="keywords" content="vault,nomad,keycloak,oidc,terraform"></span></div><hr></div><div class="vp-toc-placeholder"><aside id="toc"><!----><div class="vp-toc-header">이 페이지에서<button type="button" class="print-button" title="인쇄"><svg xmlns="http://www.w3.org/2000/svg" class="icon print-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="print icon" name="print"><path d="M819.2 364.8h-44.8V128c0-17.067-14.933-32-32-32H281.6c-17.067 0-32 14.933-32 32v236.8h-44.8C145.067 364.8 96 413.867 96 473.6v192c0 59.733 49.067 108.8 108.8 108.8h44.8V896c0 17.067 14.933 32 32 32h460.8c17.067 0 32-14.933 32-32V774.4h44.8c59.733 0 108.8-49.067 108.8-108.8v-192c0-59.733-49.067-108.8-108.8-108.8zM313.6 160h396.8v204.8H313.6V160zm396.8 704H313.6V620.8h396.8V864zM864 665.6c0 25.6-19.2 44.8-44.8 44.8h-44.8V588.8c0-17.067-14.933-32-32-32H281.6c-17.067 0-32 14.933-32 32v121.6h-44.8c-25.6 0-44.8-19.2-44.8-44.8v-192c0-25.6 19.2-44.8 44.8-44.8h614.4c25.6 0 44.8 19.2 44.8 44.8v192z"></path></svg></button><div class="arrow end"></div></div><div class="vp-toc-wrapper"><ul class="vp-toc-list"><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level2" href="#keycloak-공통영역">Keycloak 공통영역</a></li><li><ul class="vp-toc-list"><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#terraform으로-keycloak의-사전-정보를-구현">Terraform으로 Keycloak의 사전 정보를 구현</a></li><!----><!--]--></ul></li><!--]--><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level2" href="#nomad-oidc-terraform-code">Nomad OIDC Terraform Code</a></li><li><ul class="vp-toc-list"><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#terraform으로-keycloak과-nomad-oidc-설정">Terraform으로 Keycloak과 Nomad OIDC 설정</a></li><!----><!--]--><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#결과화면-추가">결과화면 추가</a></li><!----><!--]--></ul></li><!--]--><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level2" href="#vault-oidc-terraform-code">Vault OIDC Terraform Code</a></li><li><ul class="vp-toc-list"><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#terraform으로-keycloak과-vault-oidc-설정">Terraform으로 Keycloak과 Vault OIDC 설정</a></li><!----><!--]--><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#결과화면">결과화면</a></li><!----><!--]--><!--[--><li class="vp-toc-item"><a class="route-link vp-toc-link level3" href="#마치며">마치며</a></li><!----><!--]--></ul></li><!--]--></ul><div class="vp-toc-marker" style="top:-1.7rem;"></div></div><!----></aside></div><!----><div class="theme-hope-content"><h1 id="nomad-vault를-keycloak-oidc로-관리하기-with-terraform" tabindex="-1"><a class="header-anchor" href="#nomad-vault를-keycloak-oidc로-관리하기-with-terraform"><span>Nomad, Vault를 keycloak oidc로 관리하기 with terraform</span></a></h1><p>요즘같이 사내에 많은 Open Source, Enterprise Soulition이 사용되는 시기에 각 Solution별로 <strong>ID/Password를 관리하는 것</strong>은 쉽지 않습니다.<br> 거기다 만약 Dev, Stage, Production등의 환경별로 구축이 되어 있다면 이미 ID/Password를 저장하고 관리하는 것만 으로도 <strong>굉장히 반복적이고 귀찮은 작업</strong>이 될 것 입니다.</p><p>우리는 이러한 상황을 해결하기 위해 IDP(Identity Provider) Solution을 사용합니다.<br> 다양한 IDP가 있겠으나 제가 속한 회사에서는 <strong>Keycloak</strong>을 사용하고 있고 그 Keycloak을 통해<br> gitlab, grafana, nomad, vault의 사용자 인증 및 권한관리를 하고 있습니다.<br> 이 중 <strong>Terraform code</strong>로 구현이 완벽히 된 <strong>Nomad와 Vault</strong>의 Code에 대해 설명드리겠습니다.</p><h2 id="keycloak-공통영역" tabindex="-1"><a class="header-anchor" href="#keycloak-공통영역"><span>Keycloak 공통영역</span></a></h2><ul><li>Realm, Users, Groups등을 미리 설정합니다. <ul><li>Groups은 아래와 같습니다. <ul><li>opsTeam: Write권한이 있는 사용자 그룹</li><li>devTeam: Read권한만 있는 사용자 그룹</li></ul></li></ul></li></ul><h3 id="terraform으로-keycloak의-사전-정보를-구현" tabindex="-1"><a class="header-anchor" href="#terraform으로-keycloak의-사전-정보를-구현"><span>Terraform으로 Keycloak의 사전 정보를 구현</span></a></h3><ul><li>계정 정보는 Yaml로 관리하며, Group은 아직 두개 뿐이라 Variables로 관리합니다.</li><li>reader, mgmt의 role 또한 여기서 생성됩니다.</li></ul><details><summary>Keycloak Common 코드 보기</summary><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line"><span class="token comment">#main.tf </span></span>
+<span class="line">resource <span class="token string">&quot;keycloak_realm&quot;</span> <span class="token string">&quot;realm&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm   <span class="token operator">=</span> var.keycloak_realm</span>
+<span class="line">  enabled <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_user&quot;</span> <span class="token string">&quot;user_reader&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  for_each <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token keyword">for</span> <span class="token for-or-select variable">user</span> <span class="token keyword">in</span> local.keycloak_reader<span class="token punctuation">[</span><span class="token string">&quot;users&quot;</span><span class="token punctuation">]</span> <span class="token builtin class-name">:</span> user<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span><span class="token operator">&gt;</span> user <span class="token punctuation">}</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  username <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  enabled  <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"></span>
+<span class="line">  email      <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;email&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  first_name <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;first_name&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  last_name  <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;last_name&quot;</span><span class="token punctuation">]</span></span>
+<span class="line"></span>
+<span class="line">  initial_password <span class="token punctuation">{</span></span>
+<span class="line">    value     <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;pwd&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">    temporary <span class="token operator">=</span> <span class="token boolean">false</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_user&quot;</span> <span class="token string">&quot;user_management&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  for_each <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token keyword">for</span> <span class="token for-or-select variable">user</span> <span class="token keyword">in</span> local.keycloak_mgmt<span class="token punctuation">[</span><span class="token string">&quot;users&quot;</span><span class="token punctuation">]</span> <span class="token builtin class-name">:</span> user<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span><span class="token operator">&gt;</span> user <span class="token punctuation">}</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  username <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  enabled  <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"></span>
+<span class="line">  email      <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;email&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  first_name <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;first_name&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  last_name  <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;last_name&quot;</span><span class="token punctuation">]</span></span>
+<span class="line"></span>
+<span class="line">  initial_password <span class="token punctuation">{</span></span>
+<span class="line">    value     <span class="token operator">=</span> each.value<span class="token punctuation">[</span><span class="token string">&quot;pwd&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">    temporary <span class="token operator">=</span> <span class="token boolean">false</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_role&quot;</span> <span class="token string">&quot;realm_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id    <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;nomadoidc&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;My Realm Role&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_role&quot;</span> <span class="token string">&quot;mgmt_realm_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id    <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name        <span class="token operator">=</span> var.keycloak_mgmt</span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;My mgmt Role&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_role&quot;</span> <span class="token string">&quot;redaer_realm_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id    <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;reader&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;My redaer Role&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group&quot;</span> <span class="token string">&quot;reader_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name     <span class="token operator">=</span> var.keycloak_reader_group</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group&quot;</span> <span class="token string">&quot;management_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name     <span class="token operator">=</span> var.keycloak_mgmt_group</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">locals <span class="token punctuation">{</span></span>
+<span class="line">  reader_usernames <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    <span class="token keyword">for</span> <span class="token for-or-select variable">user</span> <span class="token keyword">in</span> local.keycloak_reader<span class="token punctuation">[</span><span class="token string">&quot;users&quot;</span><span class="token punctuation">]</span> <span class="token builtin class-name">:</span> user<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token punctuation">]</span></span>
+<span class="line">  mgmt_usernames <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    <span class="token keyword">for</span> <span class="token for-or-select variable">user</span> <span class="token keyword">in</span> local.keycloak_mgmt<span class="token punctuation">[</span><span class="token string">&quot;users&quot;</span><span class="token punctuation">]</span> <span class="token builtin class-name">:</span> user<span class="token punctuation">[</span><span class="token string">&quot;username&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token punctuation">]</span>  </span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group_memberships&quot;</span> <span class="token string">&quot;reader_group_members&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  group_id <span class="token operator">=</span> keycloak_group.reader_group.id</span>
+<span class="line"></span>
+<span class="line">  members  <span class="token operator">=</span> local.reader_usernames</span>
+<span class="line">  </span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group_memberships&quot;</span> <span class="token string">&quot;management_group_members&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  group_id <span class="token operator">=</span> keycloak_group.management_group.id</span>
+<span class="line"></span>
+<span class="line">  members  <span class="token operator">=</span> local.mgmt_usernames</span>
+<span class="line">  </span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group_roles&quot;</span> <span class="token string">&quot;reader_group_roles&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  group_id <span class="token operator">=</span> keycloak_group.reader_group.id</span>
+<span class="line"></span>
+<span class="line">  role_ids   <span class="token operator">=</span> <span class="token punctuation">[</span>keycloak_role.redaer_realm_role.id<span class="token punctuation">]</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_group_roles&quot;</span> <span class="token string">&quot;mgmt_group_roles&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  group_id <span class="token operator">=</span> keycloak_group.management_group.id</span>
+<span class="line"></span>
+<span class="line">  role_ids   <span class="token operator">=</span> <span class="token punctuation">[</span>keycloak_role.mgmt_realm_role.id<span class="token punctuation">]</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_client_scope&quot;</span> <span class="token string">&quot;groups&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  name     <span class="token operator">=</span> <span class="token string">&quot;groups&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_user_realm_role_protocol_mapper&quot;</span> <span class="token string">&quot;user_realm_role_mapper&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id        <span class="token operator">=</span> keycloak_realm.realm.id</span>
+<span class="line">  client_scope_id <span class="token operator">=</span> keycloak_openid_client_scope.groups.id</span>
+<span class="line">  name            <span class="token operator">=</span> <span class="token string">&quot;groups&quot;</span></span>
+<span class="line"></span>
+<span class="line">  claim_name <span class="token operator">=</span> <span class="token string">&quot;groups&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment">#var.tf</span></span>
+<span class="line">variable <span class="token string">&quot;nomad_addr&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_addr&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_admin_user&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_admin_password&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_scheme&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;https&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_realm&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;HashiCorp&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;reader_yaml&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;reader.yaml&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;mgmt_yaml&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;mgmt.yaml&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">locals <span class="token punctuation">{</span></span>
+<span class="line">  keycloak_reader <span class="token operator">=</span> yamldecode<span class="token punctuation">(</span>file<span class="token punctuation">(</span>var.reader_yaml<span class="token punctuation">))</span></span>
+<span class="line">  keycloak_mgmt   <span class="token operator">=</span> yamldecode<span class="token punctuation">(</span>file<span class="token punctuation">(</span>var.mgmt_yaml<span class="token punctuation">))</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_mgmt&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;mgmt&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_reader_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_mgmt_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"><span class="token comment">#mgmt.yaml</span></span>
+<span class="line">users:</span>
+<span class="line"><span class="token punctuation">..</span>.</span>
+<span class="line">users:</span>
+<span class="line">  - username: ung</span>
+<span class="line">    email: ung@mz.co.kr</span>
+<span class="line">    first_name: ung</span>
+<span class="line">    last_name: hee</span>
+<span class="line">    pwd: ungungung</span>
+<span class="line"><span class="token punctuation">..</span>.</span>
+<span class="line"><span class="token comment">#reader.yaml</span></span>
+<span class="line">users:</span>
+<span class="line"><span class="token punctuation">..</span>.</span>
+<span class="line">users:</span>
+<span class="line">  - username: gslee</span>
+<span class="line">    email: gs@hashicorp.com</span>
+<span class="line">    first_name: gs</span>
+<span class="line">    last_name: lee</span>
+<span class="line">    pwd: gsgsgsgs</span>
+<span class="line"><span class="token punctuation">..</span>.</span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div></details><h2 id="nomad-oidc-terraform-code" tabindex="-1"><a class="header-anchor" href="#nomad-oidc-terraform-code"><span>Nomad OIDC Terraform Code</span></a></h2><h3 id="terraform으로-keycloak과-nomad-oidc-설정" tabindex="-1"><a class="header-anchor" href="#terraform으로-keycloak과-nomad-oidc-설정"><span>Terraform으로 Keycloak과 Nomad OIDC 설정</span></a></h3><ul><li>Keycloak oidc client를 생성합니다. <ul><li>valid_redirect_uri에 nomad oidc uri인 /oidc/callback, /ui/settings/tokens를 추가해줍니다.</li><li>Nomad Role = Keycloak Groups을 맵핑 시켜서 권한을 동기화 시킵니다.</li></ul></li><li>Nomad는 Token Base로 인증인가를 합니다. <ul><li>Token의 각 read, write role을 만듭니다.</li><li>그 role기반으로 Keycloak group과 맵핑합니다.</li></ul></li></ul><details><summary>Nomad, Keycloak 코드 보기</summary><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line"><span class="token comment">#keycloak.tf</span></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_client&quot;</span> <span class="token string">&quot;openid_client&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id  <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id <span class="token operator">=</span> <span class="token string">&quot;nomadoidc&quot;</span></span>
+<span class="line"></span>
+<span class="line">  name                  <span class="token operator">=</span> <span class="token string">&quot;nomadoidc&quot;</span></span>
+<span class="line">  enabled               <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line">  standard_flow_enabled <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"></span>
+<span class="line">  access_type <span class="token operator">=</span> <span class="token string">&quot;CONFIDENTIAL&quot;</span></span>
+<span class="line">  valid_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    <span class="token string">&quot;<span class="token variable">${var.nomad_scheme}</span>://<span class="token variable">${var.nomad_addr}</span>/oidc/callback&quot;</span>,</span>
+<span class="line">    <span class="token string">&quot;<span class="token variable">${var.nomad_scheme}</span>://<span class="token variable">${var.nomad_addr}</span>/ui/settings/tokens&quot;</span>,</span>
+<span class="line">    <span class="token string">&quot;http://localhost:4649/oidc/callback&quot;</span>,</span>
+<span class="line">  <span class="token punctuation">]</span></span>
+<span class="line"></span>
+<span class="line">  login_theme <span class="token operator">=</span> <span class="token string">&quot;keycloak&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_client_default_scopes&quot;</span> <span class="token string">&quot;client_default_scopes&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id  <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id <span class="token operator">=</span> keycloak_openid_client.openid_client.id</span>
+<span class="line"></span>
+<span class="line">  default_scopes <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    <span class="token string">&quot;profile&quot;</span>,</span>
+<span class="line">    <span class="token string">&quot;email&quot;</span>,</span>
+<span class="line">    <span class="token string">&quot;roles&quot;</span>,</span>
+<span class="line">    <span class="token string">&quot;groups&quot;</span>,</span>
+<span class="line">    keycloak_openid_client_scope.openid_client_scope.name</span>
+<span class="line">  <span class="token punctuation">]</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line">resource <span class="token string">&quot;keycloak_role&quot;</span> <span class="token string">&quot;management_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id    <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id   <span class="token operator">=</span> keycloak_openid_client.openid_client.id</span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;mgmt&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;Management role&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_role&quot;</span> <span class="token string">&quot;reader_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id    <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id   <span class="token operator">=</span> keycloak_openid_client.openid_client.id</span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;reader&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;Reader role&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_client_scope&quot;</span> <span class="token string">&quot;openid_client_scope&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id               <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  name                   <span class="token operator">=</span> keycloak_openid_client.openid_client.name</span>
+<span class="line">  description            <span class="token operator">=</span> <span class="token string">&quot;When requested, this scope will map a user&#39;s group memberships to a claim&quot;</span></span>
+<span class="line">  include_in_token_scope <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment">#nomad.tf</span></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_auth_method&quot;</span> <span class="token string">&quot;keycloak&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name           <span class="token operator">=</span> <span class="token string">&quot;keycloak&quot;</span></span>
+<span class="line">  <span class="token builtin class-name">type</span>           <span class="token operator">=</span> <span class="token string">&quot;OIDC&quot;</span></span>
+<span class="line">  token_locality <span class="token operator">=</span> <span class="token string">&quot;global&quot;</span></span>
+<span class="line">  max_token_ttl  <span class="token operator">=</span> <span class="token string">&quot;150m0s&quot;</span></span>
+<span class="line">  default        <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"></span>
+<span class="line">  config <span class="token punctuation">{</span></span>
+<span class="line">    oidc_discovery_url <span class="token operator">=</span> format<span class="token punctuation">(</span><span class="token string">&quot;<span class="token variable">${var.keycloak_scheme}</span>://<span class="token variable">${var.keycloak_addr}</span>/realms/%s&quot;</span>, var.keycloak_realm<span class="token punctuation">)</span></span>
+<span class="line">    oidc_client_id     <span class="token operator">=</span> var.client_id</span>
+<span class="line">    oidc_client_secret <span class="token operator">=</span> keycloak_openid_client.openid_client.client_secret</span>
+<span class="line">    bound_audiences <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">      var.client_id</span>
+<span class="line">    <span class="token punctuation">]</span></span>
+<span class="line">    oidc_scopes <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">      <span class="token string">&quot;groups&quot;</span></span>
+<span class="line">    <span class="token punctuation">]</span></span>
+<span class="line">    allowed_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">      <span class="token string">&quot;<span class="token variable">${var.nomad_scheme}</span>://<span class="token variable">${var.nomad_addr}</span>/oidc/callback&quot;</span>,</span>
+<span class="line">      <span class="token string">&quot;<span class="token variable">${var.nomad_scheme}</span>://<span class="token variable">${var.nomad_addr}</span>/ui/settings/tokens&quot;</span>,</span>
+<span class="line">      <span class="token string">&quot;http://localhost:4649/oidc/callback&quot;</span>, // CLI로 호출하는 경우를 위해 필요</span>
+<span class="line">    <span class="token punctuation">]</span></span>
+<span class="line">    list_claim_mappings <span class="token operator">=</span> <span class="token punctuation">{</span></span>
+<span class="line">      <span class="token function">groups</span> <span class="token operator">=</span> <span class="token string">&quot;roles&quot;</span></span>
+<span class="line">    <span class="token punctuation">}</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_binding_rule&quot;</span> <span class="token string">&quot;reader&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;reader rule&quot;</span></span>
+<span class="line">  auth_method <span class="token operator">=</span> nomad_acl_auth_method.keycloak.name</span>
+<span class="line">  selector    <span class="token operator">=</span> <span class="token string">&quot;reader in list.roles&quot;</span></span>
+<span class="line">  bind_type   <span class="token operator">=</span> <span class="token string">&quot;role&quot;</span></span>
+<span class="line">  bind_name   <span class="token operator">=</span> nomad_acl_role.dev.name</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_binding_rule&quot;</span> <span class="token string">&quot;mgmt&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;management rule&quot;</span></span>
+<span class="line">  auth_method <span class="token operator">=</span> nomad_acl_auth_method.keycloak.name</span>
+<span class="line">  selector    <span class="token operator">=</span> <span class="token string">&quot;mgmt in list.roles&quot;</span></span>
+<span class="line">  bind_type   <span class="token operator">=</span> <span class="token string">&quot;role&quot;</span></span>
+<span class="line">  bind_name   <span class="token operator">=</span> nomad_acl_role.mgmt.name</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_policy&quot;</span> <span class="token string">&quot;dev&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name <span class="token operator">=</span> var.nomad_reader</span>
+<span class="line"></span>
+<span class="line">  rules_hcl <span class="token operator">=</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOT</span>
+<span class="line">namespace &quot;*&quot; {</span>
+<span class="line">  policy = &quot;read&quot;</span>
+<span class="line">  capabilities = [</span>
+<span class="line">    &quot;list-jobs&quot;,</span>
+<span class="line">    &quot;parse-job&quot;,</span>
+<span class="line">    &quot;read-job&quot;,</span>
+<span class="line">    &quot;csi-list-volume&quot;,</span>
+<span class="line">    &quot;csi-read-volume&quot;,</span>
+<span class="line">    &quot;list-scaling-policies&quot;,</span>
+<span class="line">    &quot;read-scaling-policy&quot;</span>
+<span class="line">  ]</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">EOT</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_role&quot;</span> <span class="token string">&quot;dev&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;<span class="token variable">${var.nomad_reader}</span>-acl-role&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;An ACL Role for cluster dev&quot;</span></span>
+<span class="line"></span>
+<span class="line">  policy <span class="token punctuation">{</span></span>
+<span class="line">    name <span class="token operator">=</span> nomad_acl_policy.dev.name</span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_policy&quot;</span> <span class="token string">&quot;mgmt&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name <span class="token operator">=</span> var.nomad_mgmt</span>
+<span class="line"></span>
+<span class="line">  rules_hcl <span class="token operator">=</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOT</span>
+<span class="line">namespace &quot;*&quot; {</span>
+<span class="line">  policy = &quot;write&quot;</span>
+<span class="line">    capabilities = [</span>
+<span class="line">      &quot;list-jobs&quot;,</span>
+<span class="line">      &quot;parse-job&quot;,</span>
+<span class="line">      &quot;read-job&quot;,</span>
+<span class="line">      &quot;submit-job&quot;,</span>
+<span class="line">      &quot;dispatch-job&quot;,</span>
+<span class="line">      &quot;read-logs&quot;,</span>
+<span class="line">      &quot;read-fs&quot;,</span>
+<span class="line">      &quot;alloc-exec&quot;,</span>
+<span class="line">      &quot;alloc-lifecycle&quot;,</span>
+<span class="line">      &quot;csi-write-volume&quot;,</span>
+<span class="line">      &quot;csi-mount-volume&quot;,</span>
+<span class="line">      &quot;list-scaling-policies&quot;,</span>
+<span class="line">      &quot;read-scaling-policy&quot;,</span>
+<span class="line">      &quot;read-job-scaling&quot;,</span>
+<span class="line">      &quot;scale-job&quot;</span>
+<span class="line">  ]</span>
+<span class="line">}</span>
+<span class="line">EOT</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;nomad_acl_role&quot;</span> <span class="token string">&quot;mgmt&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name        <span class="token operator">=</span> <span class="token string">&quot;<span class="token variable">${var.nomad_mgmt}</span>-acl-role&quot;</span></span>
+<span class="line">  description <span class="token operator">=</span> <span class="token string">&quot;An ACL Role for cluster mgmt&quot;</span></span>
+<span class="line"></span>
+<span class="line">  policy <span class="token punctuation">{</span></span>
+<span class="line">    name <span class="token operator">=</span> nomad_acl_policy.mgmt.name</span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"><span class="token comment"># var.tf</span></span>
+<span class="line">variable <span class="token string">&quot;nomad_addr&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_addr&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_admin_user&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_admin_password&quot;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;nomad_scheme&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;https&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;nomad_region&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;global&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_scheme&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;https&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;keycloak_realm&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;HashiCorp&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;nomad_reader&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;nomad_mgmt&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">variable <span class="token string">&quot;client_id&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  default <span class="token operator">=</span> <span class="token string">&quot;nomadoidc&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div></details><h3 id="결과화면-추가" tabindex="-1"><a class="header-anchor" href="#결과화면-추가"><span>결과화면 추가</span></a></h3><ul><li>Nomad UI에서 SSO 연동 버튼이 활성화됩니다.</li></ul><figure><img src="/assets/hashicorp-oidc-1-COt_JXG4.png" alt="Nomad UI" tabindex="0" loading="lazy"><figcaption>Nomad UI</figcaption></figure><ul><li>Mgmt group인 ung 계정으로 로그인 하면 opsTeam의 write권한을 할당받습니다.</li></ul><figure><img src="/assets/hashicorp-oidc-2-BG7Yim5g.png" alt="Nomad UI" tabindex="0" loading="lazy"><figcaption>Nomad UI</figcaption></figure><ul><li>Reader group인 gslee 계정으로 로그인 하면 devTeam의 read권한을 할당받습니다.</li></ul><figure><img src="/assets/hashicorp-oidc-3-BcChkLQP.png" alt="Nomad UI" tabindex="0" loading="lazy"><figcaption>Nomad UI</figcaption></figure><h2 id="vault-oidc-terraform-code" tabindex="-1"><a class="header-anchor" href="#vault-oidc-terraform-code"><span>Vault OIDC Terraform Code</span></a></h2><h3 id="terraform으로-keycloak과-vault-oidc-설정" tabindex="-1"><a class="header-anchor" href="#terraform으로-keycloak과-vault-oidc-설정"><span>Terraform으로 Keycloak과 Vault OIDC 설정</span></a></h3><ul><li>Keycloak oidc client를 생성합니다.</li><li>Vault는 entity group의 alias name과 Keycloak group name을 맵핑합니다. <ul><li>Vault group 생성 시에는 external로 생성이 필요합니다.</li><li>opsTeam에는 전체 Write권한을, devTeam에는 전체 Read권한을 적용합니다.</li></ul></li></ul><details><summary>Vault, Keycloak 코드 보기</summary><div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="line"><span class="token comment">#keycloak.tf</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_client&quot;</span> <span class="token string">&quot;openid_client&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id  <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id <span class="token operator">=</span> <span class="token string">&quot;vault-oidc-ung&quot;</span></span>
+<span class="line"></span>
+<span class="line">  name                  <span class="token operator">=</span> <span class="token string">&quot;vault-oidc-ung&quot;</span></span>
+<span class="line">  enabled               <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line">  standard_flow_enabled <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"></span>
+<span class="line">  access_type <span class="token operator">=</span> <span class="token string">&quot;CONFIDENTIAL&quot;</span></span>
+<span class="line">  valid_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    <span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/*&quot;</span></span>
+<span class="line">   <span class="token punctuation">]</span></span>
+<span class="line">  login_theme <span class="token operator">=</span> <span class="token string">&quot;keycloak&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;keycloak_openid_user_client_role_protocol_mapper&quot;</span> <span class="token string">&quot;user_client_role_mapper&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  realm_id  <span class="token operator">=</span> var.relam_id</span>
+<span class="line">  client_id <span class="token operator">=</span> keycloak_openid_client.openid_client.id</span>
+<span class="line">  name      <span class="token operator">=</span> <span class="token string">&quot;ung-user-client-role-mapper&quot;</span></span>
+<span class="line">  claim_name <span class="token operator">=</span> format<span class="token punctuation">(</span><span class="token string">&quot;resource_access.%s.roles&quot;</span>,</span>
+<span class="line">  keycloak_openid_client.openid_client.client_id<span class="token punctuation">)</span></span>
+<span class="line">  multivalued <span class="token operator">=</span> <span class="token boolean">true</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment">#vault.tf</span></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_oidc_key&quot;</span> <span class="token string">&quot;keycloak_provider_key&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name      <span class="token operator">=</span> <span class="token string">&quot;keycloak&quot;</span></span>
+<span class="line">  algorithm <span class="token operator">=</span> <span class="token string">&quot;RS256&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_jwt_auth_backend&quot;</span> <span class="token string">&quot;keycloak&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  path               <span class="token operator">=</span> <span class="token string">&quot;oidc-keycloak&quot;</span></span>
+<span class="line">  <span class="token builtin class-name">type</span>               <span class="token operator">=</span> <span class="token string">&quot;oidc&quot;</span></span>
+<span class="line">  default_role       <span class="token operator">=</span> <span class="token string">&quot;default&quot;</span></span>
+<span class="line">  oidc_discovery_url <span class="token operator">=</span> format<span class="token punctuation">(</span><span class="token string">&quot;<span class="token variable">${var.keycloak_url}</span>/realms/HashiCorp&quot;</span><span class="token punctuation">)</span></span>
+<span class="line">  oidc_client_id     <span class="token operator">=</span> keycloak_openid_client.openid_client.client_id</span>
+<span class="line">  oidc_client_secret <span class="token operator">=</span> keycloak_openid_client.openid_client.client_secret</span>
+<span class="line">  </span>
+<span class="line">  tune <span class="token punctuation">{</span></span>
+<span class="line">    audit_non_hmac_request_keys  <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    audit_non_hmac_response_keys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    default_lease_ttl            <span class="token operator">=</span> <span class="token string">&quot;1h&quot;</span></span>
+<span class="line">    listing_visibility           <span class="token operator">=</span> <span class="token string">&quot;unauth&quot;</span></span>
+<span class="line">    max_lease_ttl                <span class="token operator">=</span> <span class="token string">&quot;1h&quot;</span></span>
+<span class="line">    passthrough_request_headers  <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    token_type                   <span class="token operator">=</span> <span class="token string">&quot;default-service&quot;</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_jwt_auth_backend_role&quot;</span> <span class="token string">&quot;devteam&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  backend       <span class="token operator">=</span> vault_jwt_auth_backend.keycloak.path</span>
+<span class="line">  role_name     <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  token_ttl     <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_max_ttl <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_policies <span class="token operator">=</span> concat<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">&quot;devTeam&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span></span>
+<span class="line">  bound_audiences <span class="token operator">=</span> <span class="token punctuation">[</span>keycloak_openid_client.openid_client.client_id<span class="token punctuation">]</span></span>
+<span class="line">  user_claim      <span class="token operator">=</span> <span class="token string">&quot;sub&quot;</span></span>
+<span class="line">  claim_mappings <span class="token operator">=</span> <span class="token punctuation">{</span></span>
+<span class="line">    preferred_username <span class="token operator">=</span> <span class="token string">&quot;username&quot;</span></span>
+<span class="line">    email              <span class="token operator">=</span> <span class="token string">&quot;email&quot;</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line">  role_type             <span class="token operator">=</span> <span class="token string">&quot;oidc&quot;</span></span>
+<span class="line">  allowed_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/ui/vault/auth/oidc-keycloak/oidc/callback&quot;</span>, </span>
+<span class="line">                            <span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/oidc/callback&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token comment">#groups_claim          = format(&quot;/resource_access/%s/roles&quot;, keycloak_openid_client.openid_client.client_id)</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_oidc_key&quot;</span> <span class="token string">&quot;keycloak_provider_key&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name      <span class="token operator">=</span> <span class="token string">&quot;keycloak&quot;</span></span>
+<span class="line">  algorithm <span class="token operator">=</span> <span class="token string">&quot;RS256&quot;</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_jwt_auth_backend&quot;</span> <span class="token string">&quot;keycloak&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  path               <span class="token operator">=</span> <span class="token string">&quot;oidc-keycloak&quot;</span></span>
+<span class="line">  <span class="token builtin class-name">type</span>               <span class="token operator">=</span> <span class="token string">&quot;oidc&quot;</span></span>
+<span class="line">  default_role       <span class="token operator">=</span> <span class="token string">&quot;default&quot;</span></span>
+<span class="line">  oidc_discovery_url <span class="token operator">=</span> format<span class="token punctuation">(</span><span class="token string">&quot;<span class="token variable">${var.keycloak_url}</span>/realms/HashiCorp&quot;</span><span class="token punctuation">)</span></span>
+<span class="line">  oidc_client_id     <span class="token operator">=</span> keycloak_openid_client.openid_client.client_id</span>
+<span class="line">  oidc_client_secret <span class="token operator">=</span> keycloak_openid_client.openid_client.client_secret</span>
+<span class="line">  </span>
+<span class="line">  tune <span class="token punctuation">{</span></span>
+<span class="line">    audit_non_hmac_request_keys  <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    audit_non_hmac_response_keys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    default_lease_ttl            <span class="token operator">=</span> <span class="token string">&quot;1h&quot;</span></span>
+<span class="line">    listing_visibility           <span class="token operator">=</span> <span class="token string">&quot;unauth&quot;</span></span>
+<span class="line">    max_lease_ttl                <span class="token operator">=</span> <span class="token string">&quot;1h&quot;</span></span>
+<span class="line">    passthrough_request_headers  <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="line">    token_type                   <span class="token operator">=</span> <span class="token string">&quot;default-service&quot;</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_jwt_auth_backend_role&quot;</span> <span class="token string">&quot;devteam&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  backend       <span class="token operator">=</span> vault_jwt_auth_backend.keycloak.path</span>
+<span class="line">  role_name     <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  token_ttl     <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_max_ttl <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_policies <span class="token operator">=</span> concat<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">&quot;devTeam&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span></span>
+<span class="line">  bound_audiences <span class="token operator">=</span> <span class="token punctuation">[</span>keycloak_openid_client.openid_client.client_id<span class="token punctuation">]</span></span>
+<span class="line">  user_claim      <span class="token operator">=</span> <span class="token string">&quot;sub&quot;</span></span>
+<span class="line">  claim_mappings <span class="token operator">=</span> <span class="token punctuation">{</span></span>
+<span class="line">    preferred_username <span class="token operator">=</span> <span class="token string">&quot;username&quot;</span></span>
+<span class="line">    email              <span class="token operator">=</span> <span class="token string">&quot;email&quot;</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line">  role_type             <span class="token operator">=</span> <span class="token string">&quot;oidc&quot;</span></span>
+<span class="line">  allowed_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/ui/vault/auth/oidc-keycloak/oidc/callback&quot;</span>, </span>
+<span class="line">                            <span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/oidc/callback&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token comment">#groups_claim          = format(&quot;/resource_access/%s/roles&quot;, keycloak_openid_client.openid_client.client_id)</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_jwt_auth_backend_role&quot;</span> <span class="token string">&quot;opsteam&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  backend       <span class="token operator">=</span> vault_jwt_auth_backend.keycloak.path</span>
+<span class="line">  role_name     <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line">  token_ttl     <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_max_ttl <span class="token operator">=</span> <span class="token number">3600</span></span>
+<span class="line">  token_policies <span class="token operator">=</span> concat<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">&quot;opsTeam&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span></span>
+<span class="line">  bound_audiences <span class="token operator">=</span> <span class="token punctuation">[</span>keycloak_openid_client.openid_client.client_id<span class="token punctuation">]</span></span>
+<span class="line">  user_claim      <span class="token operator">=</span> <span class="token string">&quot;sub&quot;</span></span>
+<span class="line">  claim_mappings <span class="token operator">=</span> <span class="token punctuation">{</span></span>
+<span class="line">    preferred_username <span class="token operator">=</span> <span class="token string">&quot;username&quot;</span></span>
+<span class="line">    email              <span class="token operator">=</span> <span class="token string">&quot;email&quot;</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line">  role_type             <span class="token operator">=</span> <span class="token string">&quot;oidc&quot;</span></span>
+<span class="line">  allowed_redirect_uris <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/ui/vault/auth/oidc-keycloak/oidc/callback&quot;</span>, </span>
+<span class="line">                            <span class="token string">&quot;<span class="token variable">${var.vault_url}</span>/oidc/callback&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token comment">#groups_claim          = format(&quot;/resource_access/%s/roles&quot;, keycloak_openid_client.openid_client.client_id)</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment">#------------------------------------------------------------------------------#</span></span>
+<span class="line"><span class="token comment"># Reader Vault policy</span></span>
+<span class="line"><span class="token comment">#------------------------------------------------------------------------------#</span></span>
+<span class="line"></span>
+<span class="line">data <span class="token string">&quot;vault_policy_document&quot;</span> <span class="token string">&quot;devTeam_policy&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  rule <span class="token punctuation">{</span></span>
+<span class="line">    path         <span class="token operator">=</span> <span class="token string">&quot;*&quot;</span></span>
+<span class="line">    capabilities <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&quot;read&quot;</span>, <span class="token string">&quot;list&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_policy&quot;</span> <span class="token string">&quot;devTeam_policy&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name   <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  policy <span class="token operator">=</span> data.vault_policy_document.devTeam_policy.hcl</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_oidc_role&quot;</span> <span class="token string">&quot;devTeam_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  key  <span class="token operator">=</span> vault_identity_oidc_key.keycloak_provider_key.name</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_group&quot;</span> <span class="token string">&quot;devTeam_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name     <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  <span class="token builtin class-name">type</span>     <span class="token operator">=</span> <span class="token string">&quot;external&quot;</span></span>
+<span class="line">  policies <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    vault_policy.devTeam_policy.name</span>
+<span class="line">  <span class="token punctuation">]</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_group_alias&quot;</span> <span class="token string">&quot;reader_group_alias&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name           <span class="token operator">=</span> <span class="token string">&quot;devTeam&quot;</span></span>
+<span class="line">  mount_accessor <span class="token operator">=</span> vault_jwt_auth_backend.keycloak.accessor</span>
+<span class="line">  canonical_id   <span class="token operator">=</span> vault_identity_group.devTeam_group.id</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment">#------------------------------------------------------------------------------#</span></span>
+<span class="line"><span class="token comment"># Mgmt Vault policy</span></span>
+<span class="line"><span class="token comment">#------------------------------------------------------------------------------#</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line">data <span class="token string">&quot;vault_policy_document&quot;</span> <span class="token string">&quot;opsTeam_policy&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  rule <span class="token punctuation">{</span></span>
+<span class="line">    path         <span class="token operator">=</span> <span class="token string">&quot;*&quot;</span></span>
+<span class="line">    capabilities <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&quot;create&quot;</span>, <span class="token string">&quot;update&quot;</span>, <span class="token string">&quot;delete&quot;</span>, <span class="token string">&quot;read&quot;</span>, <span class="token string">&quot;list&quot;</span><span class="token punctuation">]</span></span>
+<span class="line">  <span class="token punctuation">}</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_policy&quot;</span> <span class="token string">&quot;opsTeam_policy&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name   <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line">  policy <span class="token operator">=</span> data.vault_policy_document.opsTeam_policy.hcl</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_oidc_role&quot;</span> <span class="token string">&quot;opsTeam_role&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line">  key  <span class="token operator">=</span> vault_identity_oidc_key.keycloak_provider_key.name</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_group&quot;</span> <span class="token string">&quot;opsTeam_group&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name     <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line">  <span class="token builtin class-name">type</span>     <span class="token operator">=</span> <span class="token string">&quot;external&quot;</span></span>
+<span class="line">  policies <span class="token operator">=</span> <span class="token punctuation">[</span></span>
+<span class="line">    vault_policy.opsTeam_policy.name</span>
+<span class="line">  <span class="token punctuation">]</span></span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line">resource <span class="token string">&quot;vault_identity_group_alias&quot;</span> <span class="token string">&quot;mgmt_group_alias&quot;</span> <span class="token punctuation">{</span></span>
+<span class="line">  name           <span class="token operator">=</span> <span class="token string">&quot;opsTeam&quot;</span></span>
+<span class="line">  mount_accessor <span class="token operator">=</span> vault_jwt_auth_backend.keycloak.accessor</span>
+<span class="line">  canonical_id   <span class="token operator">=</span> vault_identity_group.opsTeam_group.id</span>
+<span class="line"><span class="token punctuation">}</span></span>
+<span class="line"></span>
+<span class="line"></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div></details><h3 id="결과화면" tabindex="-1"><a class="header-anchor" href="#결과화면"><span>결과화면</span></a></h3><ul><li>Vault UI에서 SSO 연동 버튼이 활성화됩니다. <ul><li>namespace는 ung, Role은 opsTeam으로 로그인합니다.</li></ul></li></ul><figure><img src="/assets/hashicorp-oidc-4-DYrUfDhi.png" alt="Vault UI" tabindex="0" loading="lazy"><figcaption>Vault UI</figcaption></figure><ul><li>opsTeam으로 로그인하면 Write권한이 있습니다.</li></ul><figure><img src="/assets/hashicorp-oidc-5-BuNV_lPV.png" alt="Vault UI" tabindex="0" loading="lazy"><figcaption>Vault UI</figcaption></figure><ul><li>로그아웃 후 이번에는 devTeam으로 로그인합니다.</li></ul><figure><img src="/assets/hashicorp-oidc-6-B5IGgDM_.png" alt="Vault UI" tabindex="0" loading="lazy"><figcaption>Vault UI</figcaption></figure><ul><li>opsTeam과 다르게 Secret update, delete 권한이 없습니다.</li></ul><figure><img src="/assets/hashicorp-oidc-7-Cxy5Jsf4.png" alt="Vault UI" tabindex="0" loading="lazy"><figcaption>Vault UI</figcaption></figure><h3 id="마치며" tabindex="-1"><a class="header-anchor" href="#마치며"><span>마치며</span></a></h3><ul><li>Terraform Provider만 있다면 즉, API만 제공된다면 위와 같이 code로 oidc 연동부터 계정 관리 및 권한 체계까지 관리할 수 있게 됩니다. 이러한 상황에 이점은 code화 된 권한 쳬게와 계정관리로 인한 휴먼 에러나 추가 생성 및 변경에 대해 이력관리 및 확장성에 이점이 있다고 보면 될 것 같습니다.</li></ul></div><!----><footer class="vp-page-meta"><div class="vp-meta-item edit-link"><a class="auto-link external-link vp-meta-label" href="https://github.com/docmoa/docs/edit/main/docs/04-HashiCorp/03-Terraform/03-Sample/hashicorp-oidc.md" aria-label="Edit this page on GitHub" rel="noopener noreferrer" target="_blank"><!--[--><svg xmlns="http://www.w3.org/2000/svg" class="icon edit-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="edit icon" name="edit"><path d="M430.818 653.65a60.46 60.46 0 0 1-50.96-93.281l71.69-114.012 7.773-10.365L816.038 80.138A60.46 60.46 0 0 1 859.225 62a60.46 60.46 0 0 1 43.186 18.138l43.186 43.186a60.46 60.46 0 0 1 0 86.373L588.879 565.55l-8.637 8.637-117.466 68.234a60.46 60.46 0 0 1-31.958 11.229z"></path><path d="M728.802 962H252.891A190.883 190.883 0 0 1 62.008 771.98V296.934a190.883 190.883 0 0 1 190.883-192.61h267.754a60.46 60.46 0 0 1 0 120.92H252.891a69.962 69.962 0 0 0-69.098 69.099V771.98a69.962 69.962 0 0 0 69.098 69.098h475.911A69.962 69.962 0 0 0 797.9 771.98V503.363a60.46 60.46 0 1 1 120.922 0V771.98A190.883 190.883 0 0 1 728.802 962z"></path></svg><!--]-->Edit this page on GitHub<!----></a></div><div class="vp-meta-item git-info"><div class="update-time"><span class="vp-meta-label">마지막 수정: </span><!----></div><div class="contributors"><span class="vp-meta-label">기여자: </span><!--[--><!--[--><span class="vp-meta-info" title="email: ung@mz.co.kr">ung</span><!--]--><!--]--></div></div></footer><nav class="vp-page-nav"><a class="route-link auto-link prev" href="/04-HashiCorp/03-Terraform/03-Sample/nomad-csi-sample.html" aria-label="Nomad CSI Sample"><div class="hint"><span class="arrow start"></span>이전</div><div class="link"><!---->Nomad CSI Sample</div></a><!----></nav><!----><!----><!--]--></main><!--]--><footer class="vp-footer-wrapper"><div class="vp-footer">CC BY-NC-ND 4.0 Licensed | ⓒ 2021-present docmoa™ contributers all rights reserved.</div><div class="vp-copyright">Copyright © 2025 unghee </div></footer></div><!--]--><!--]--><!--[--><!----><!----><!----><!--]--><!--]--></div>
+    <script type="module" src="/assets/app-DhMJQ1_3.js" defer></script>
+  </body>
+</html>

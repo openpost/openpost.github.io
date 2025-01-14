@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Sitemap: https://docmoa.github.io/sitemap.xml
+User-agent:*
+Disallow:
+
+Sitemap: https://docmoa.github.io/sitemap.xml
